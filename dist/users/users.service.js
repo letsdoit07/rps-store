@@ -16,9 +16,11 @@ exports.UsersService = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
+const s3_service_1 = require("../auth/s3.service");
 let UsersService = class UsersService {
-    constructor(userModel) {
+    constructor(userModel, s3Service) {
         this.userModel = userModel;
+        this.s3Service = s3Service;
     }
     async checkIfUserExists(email) {
         return await this.userModel.exists({ email });
@@ -30,11 +32,23 @@ let UsersService = class UsersService {
         let newUser = await this.userModel.create(createUserDTO);
         return newUser.save();
     }
+    async uploadProfilePic(email, file) {
+        let url = await this.s3Service.uploadFile(file, file.originalname, "ProfilePictures");
+        if (!url) {
+            throw new common_1.BadRequestException();
+        }
+        console.log(email);
+        let query = await this.userModel.findOneAndUpdate({ email }, {
+            profilePic: url
+        });
+        console.log(query);
+        return url;
+    }
 };
 UsersService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)('User')),
-    __metadata("design:paramtypes", [mongoose_2.Model])
+    __metadata("design:paramtypes", [mongoose_2.Model, s3_service_1.S3Service])
 ], UsersService);
 exports.UsersService = UsersService;
 //# sourceMappingURL=users.service.js.map

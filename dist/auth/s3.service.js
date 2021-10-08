@@ -9,28 +9,39 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.JwtStrategy = void 0;
-const passport_jwt_1 = require("passport-jwt");
-const passport_1 = require("@nestjs/passport");
+exports.S3Service = void 0;
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
-let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy) {
+const aws_sdk_1 = require("aws-sdk");
+let S3Service = class S3Service {
     constructor(configService) {
-        super({
-            jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
-            ignoreExpiration: false,
-            secretOrKey: configService.get('JWT_SECRET'),
-        });
         this.configService = configService;
+        this.s3 = new aws_sdk_1.S3({
+            accessKeyId: configService.get('AWS_KEY'),
+            secretAccessKey: configService.get('AWS_SECRET'),
+        });
+        this.storageName = configService.get('AWS_S3_BUCKET');
     }
-    async validate(payload) {
-        console.log(payload);
-        return { email: payload.email, id: payload.id };
+    async uploadFile(file, name, folder) {
+        const params = {
+            Bucket: this.storageName + "/" + folder,
+            Key: name,
+            Body: file.buffer,
+            ACL: "public-read",
+        };
+        try {
+            let s3Response = await this.s3.upload(params).promise();
+            return s3Response.Location;
+        }
+        catch (e) {
+            console.log(e);
+            return null;
+        }
     }
 };
-JwtStrategy = __decorate([
+S3Service = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [config_1.ConfigService])
-], JwtStrategy);
-exports.JwtStrategy = JwtStrategy;
-//# sourceMappingURL=jwt.strategy.js.map
+], S3Service);
+exports.S3Service = S3Service;
+//# sourceMappingURL=s3.service.js.map

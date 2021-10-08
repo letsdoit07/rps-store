@@ -1,4 +1,5 @@
-import { Controller, Get, NotFoundException, Param, Query, UnauthorizedException, UseGuards } from '@nestjs/common';
+import { Controller, Get,Post, NotFoundException, Param, Query, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors, Body } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { NotFoundError } from 'rxjs';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { User } from './schema/user.schema';
@@ -17,6 +18,12 @@ export class UsersController {
             throw new NotFoundException()
         }
         return user;
+    }
+
+    @Post('uploadProfilePic/:id')
+    @UseInterceptors(FileInterceptor('file'))
+    uploadProfilePic(@Param('id') email:string,@UploadedFile() file:Express.Multer.File):Promise<any>{
+        return this.usersService.uploadProfilePic(email,file);
     }
 
 }

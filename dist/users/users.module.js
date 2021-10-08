@@ -13,6 +13,7 @@ const users_controller_1 = require("./users.controller");
 const users_service_1 = require("./users.service");
 const user_schema_1 = require("./schema/user.schema");
 const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
+const s3_service_1 = require("../auth/s3.service");
 let UsersModule = class UsersModule {
 };
 UsersModule = __decorate([
@@ -22,7 +23,7 @@ UsersModule = __decorate([
                     schema: user_schema_1.UserSchema
                 }]),],
         controllers: [users_controller_1.UsersController],
-        providers: [users_service_1.UsersService],
+        providers: [users_service_1.UsersService, s3_service_1.S3Service],
         exports: [users_service_1.UsersService]
     })
 ], UsersModule);

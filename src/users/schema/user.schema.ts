@@ -8,6 +8,11 @@ export class User{
     name:string
 
     @Prop({
+        type:String
+    })
+    profilePic:string
+
+    @Prop({
         type:String,
         unique:true})
     email:string

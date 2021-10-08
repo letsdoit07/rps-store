@@ -10,14 +10,25 @@ exports.AppModule = void 0;
 const common_1 = require("@nestjs/common");
 const products_module_1 = require("./products/products.module");
 const mongoose_1 = require("@nestjs/mongoose");
-const keys_1 = require("./config/keys");
 const users_module_1 = require("./users/users.module");
 const auth_module_1 = require("./auth/auth.module");
+const config_1 = require("@nestjs/config");
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
     (0, common_1.Module)({
-        imports: [auth_module_1.AuthModule, users_module_1.UsersModule, products_module_1.ProductsModule, mongoose_1.MongooseModule.forRoot(keys_1.default.mongoURI)],
+        imports: [auth_module_1.AuthModule, users_module_1.UsersModule, products_module_1.ProductsModule,
+            config_1.ConfigModule.forRoot({
+                envFilePath: 'config.env',
+                isGlobal: true
+            }),
+            mongoose_1.MongooseModule.forRootAsync({
+                imports: [config_1.ConfigModule],
+                useFactory: async (configService) => ({
+                    uri: configService.get('MONGO_URI'),
+                }),
+                inject: [config_1.ConfigService],
+            })],
         controllers: [],
         providers: [],
     })

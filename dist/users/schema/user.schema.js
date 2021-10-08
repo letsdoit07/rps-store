@@ -21,6 +21,12 @@ __decorate([
 ], User.prototype, "name", void 0);
 __decorate([
     (0, mongoose_1.Prop)({
+        type: String
+    }),
+    __metadata("design:type", String)
+], User.prototype, "profilePic", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({
         type: String,
         unique: true
     }),

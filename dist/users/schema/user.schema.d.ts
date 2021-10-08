@@ -1,6 +1,7 @@
 /// <reference types="mongoose" />
 export declare class User {
     name: string;
+    profilePic: string;
     email: string;
     passwordHash: string;
 }

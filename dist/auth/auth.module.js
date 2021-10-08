@@ -8,24 +8,36 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthModule = void 0;
 const common_1 = require("@nestjs/common");
+const config_1 = require("@nestjs/config");
 const jwt_1 = require("@nestjs/jwt");
 const passport_1 = require("@nestjs/passport");
 const users_module_1 = require("../users/users.module");
-const keys_1 = require("../config/keys");
 const auth_controller_1 = require("./auth.controller");
 const auth_service_1 = require("./auth.service");
 const jwt_strategy_1 = require("./jwt.strategy");
 const local_strategy_1 = require("./local.strategy");
+const s3_service_1 = require("./s3.service");
 let AuthModule = class AuthModule {
 };
 AuthModule = __decorate([
     (0, common_1.Module)({
-        imports: [users_module_1.UsersModule, passport_1.PassportModule, jwt_1.JwtModule.register({
-                secret: keys_1.default.jwtSecret,
+        imports: [users_module_1.UsersModule, passport_1.PassportModule, jwt_1.JwtModule.registerAsync({
+                imports: [config_1.ConfigModule],
+                useFactory: async (configService) => ({
+                    secret: configService.get('JWT_SECRET'),
+                    signOptions: {
+                        expiresIn: '90d',
+                    },
+                }),
+                inject: [config_1.ConfigService]
             })],
-        providers: [auth_service_1.AuthService, local_strategy_1.LocalStrategy, jwt_strategy_1.JwtStrategy],
+        providers: [auth_service_1.AuthService, local_strategy_1.LocalStrategy, jwt_strategy_1.JwtStrategy, {
+                inject: [config_1.ConfigService],
+                provide: s3_service_1.S3Service,
+                useFactory: async (configService) => new s3_service_1.S3Service(configService),
+            }],
         controllers: [auth_controller_1.AuthController],
-        exports: [auth_service_1.AuthService]
+        exports: [auth_service_1.AuthService, s3_service_1.S3Service]
     })
 ], AuthModule);
 exports.AuthModule = AuthModule;
